@@ -1581,10 +1581,13 @@ public class ChrisRip extends AbstractClassifier implements
       double pessimisticError[] = new double[size];
       double errorRate[] = new double[size];
       double zScore = 1.2; //80% confidence
+      double[] numErrors = new double[size];
+      double[] nPrime = new double[size];
 
       for (int w = 0; w < size; w++) {
         worthRt[w] = coverage[w] = worthValue[w] = 0.0;
-        pessimisticError[w] = errorRate[w] = 1;
+        pessimisticError[w] = errorRate[w] = numErrors[w] = 1;
+        nPrime[w] = 0;
       }
 
       /* Calculate accuracy parameters for all the antecedents in this rule */
@@ -1647,6 +1650,7 @@ public class ChrisRip extends AbstractClassifier implements
           }
           else {
               errorRate[x] = 1 - worthValue[x] / coverage[x];
+              numErrors[x] = coverage[x] - worthValue[x];
               pessimisticError[x] = ( (errorRate[x] + (zScore*zScore)/(2 * coverage[x]) + zScore * Math.sqrt( errorRate[x]/coverage[x] - (errorRate[x]*errorRate[x])/coverage[x] + (zScore*zScore)/(4*coverage[x]*coverage[x]) ) ) ) / (1 + (zScore*zScore)/coverage[x]);
           }
           System.out.println("worthValue: " + worthValue[x]);
@@ -1656,8 +1660,9 @@ public class ChrisRip extends AbstractClassifier implements
       }
 
       double maxValue = (defAccu + 1.0) / (total + 2.0);
-      double minError = Math.abs(1.0 - defAccu + 1.0) / total;
+      double minError = Math.abs(total - defAccu) / total;
       double minP = ( (minError + (zScore*zScore)/(2 * total) + zScore * Math.sqrt( minError/total - (minError*minError)/total+ (zScore*zScore)/(4*total*total) ) ) ) / (1 + (zScore*zScore)/total);
+      //double eAndSE = minError + se;
       int maxIndex = -1;
       for (int i = 0; i < worthValue.length; i++) {
         if (m_Debug) {
