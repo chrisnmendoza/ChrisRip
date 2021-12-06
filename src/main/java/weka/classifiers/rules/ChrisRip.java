@@ -1580,7 +1580,7 @@ public class ChrisRip extends AbstractClassifier implements
       /* pessimistic error values stored here, using 80% confidence */
       double pessimisticError[] = new double[size];
       double errorRate[] = new double[size];
-      double zScore = 1.28; //80% confidence
+      double zScore = 1.2; //80% confidence
 
       for (int w = 0; w < size; w++) {
         worthRt[w] = coverage[w] = worthValue[w] = 0.0;
@@ -1949,7 +1949,7 @@ public class ChrisRip extends AbstractClassifier implements
         if (m_Debug) {
           System.err.println("\nGrowing a rule ...");
         }
-        oneRule.grow(growData); // Build the rule
+        oneRule.grow(data); // Build the rule NO NEED TO SPLIT DATA
         if (m_Debug) {
           System.err.println("One rule found before pruning:"
             + oneRule.toString(m_Class));
@@ -1958,7 +1958,7 @@ public class ChrisRip extends AbstractClassifier implements
         if (m_Debug) {
           System.err.println("\nPruning the rule ...");
         }
-        oneRule.prune(pruneData, false); // Prune the rule
+        oneRule.prune(data, false); // Prune the rule NO NEED TO SPLIT DATA
         if (m_Debug) {
           System.err.println("One rule found after pruning:"
             + oneRule.toString(m_Class));
@@ -2048,10 +2048,10 @@ public class ChrisRip extends AbstractClassifier implements
                                                      // examples
           // Re-do shuffling and stratification
           // newData.randomize(m_Random);
-          newData = RuleStats.stratify(newData, m_Folds, m_Random);
-          Instances[] part = RuleStats.partition(newData, m_Folds);
-          growData = part[0];
-          pruneData = part[1];
+          //newData = RuleStats.stratify(newData, m_Folds, m_Random);
+          //Instances[] part = RuleStats.partition(newData, m_Folds);
+          //growData = part[0];
+          //pruneData = part[1];
           // growData=newData.trainCV(m_Folds, m_Folds-1);
           // pruneData=newData.testCV(m_Folds, m_Folds-1);
           RipperRule finalRule;
@@ -2067,8 +2067,8 @@ public class ChrisRip extends AbstractClassifier implements
             if (m_Debug) {
               System.err.println("\nGrowing and pruning" + " a new rule ...");
             }
-            newRule.grow(growData);
-            newRule.prune(pruneData, false);
+            newRule.grow(newData);
+            newRule.prune(newData, false);
             finalRule = newRule;
             if (m_Debug) {
               System.err.println("\nNew rule found: "
@@ -2097,16 +2097,16 @@ public class ChrisRip extends AbstractClassifier implements
             }
             RipperRule replace = new RipperRule();
             replace.setConsequent(classIndex);
-            replace.grow(growData);
+            replace.grow(newData);
 
             // Remove the pruning data covered by the following
             // rules, then simply compute the error rate of the
             // current rule to prune it. According to Ripper,
             // it's equivalent to computing the error of the
             // whole ruleset -- is it true?
-            pruneData = RuleStats.rmCoveredBySuccessives(pruneData, ruleset,
+            pruneData = RuleStats.rmCoveredBySuccessives(newData, ruleset,
               position);
-            replace.prune(pruneData, true);
+            replace.prune(newData, true);
 
             if (m_Debug) {
               System.err.println("\nGrowing and pruning" + " Revision ...");
@@ -2114,15 +2114,15 @@ public class ChrisRip extends AbstractClassifier implements
             RipperRule revision = (RipperRule) oldRule.copy();
 
             // For revision, first rm the data covered by the old rule
-            Instances newGrowData = new Instances(growData, 0);
-            for (int b = 0; b < growData.numInstances(); b++) {
-              Instance inst = growData.instance(b);
+            Instances newGrowData = new Instances(newData, 0);
+            for (int b = 0; b < newData.numInstances(); b++) {
+              Instance inst = newData.instance(b);
               if (revision.covers(inst)) {
                 newGrowData.add(inst);
               }
             }
             revision.grow(newGrowData);
-            revision.prune(pruneData, true);
+            revision.prune(newData, true);
 
             double[][] prevRuleStats = new double[position][6];
             for (int c = 0; c < position; c++) {
