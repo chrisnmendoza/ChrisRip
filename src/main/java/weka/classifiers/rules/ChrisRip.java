@@ -1552,7 +1552,7 @@ public class ChrisRip extends AbstractClassifier implements
      *          pruning data instead of the data covered
      */
     public void prune(Instances pruneData, boolean useWhole) {
-      System.out.println("useWhole: " + useWhole);
+      //System.out.println("useWhole: " + useWhole);
       Instances data = pruneData;
 
       double total = data.sumOfWeights();
@@ -1577,10 +1577,10 @@ public class ChrisRip extends AbstractClassifier implements
       double[] coverage = new double[size];
       double[] worthValue = new double[size];
       
-      /* pessimistic error values stored here, using 80% confidence */
+      /* pessimistic error values stored here, using J48 default 50% confidence */
       double pessimisticError[] = new double[size];
       double errorRate[] = new double[size];
-      double zScore = 1.2; //80% confidence
+      double zScore = 0.69; //50% confidence
       double[] numErrors = new double[size];
       double[] nPrime = new double[size];
 
@@ -1643,7 +1643,7 @@ public class ChrisRip extends AbstractClassifier implements
            * q = (e + (z^2)/(2N) + z*sqrt( e/N - (e^2)/N + (z^2)/(4N^2) ) ) / (1 + (z^2)/N)
           */
           
-          System.out.println("n: " + coverage[x]);
+          //System.out.println("n: " + coverage[x]);
           if(coverage[x] == 0) {
               //System.out.println("no coverage");
               pessimisticError[x] = 1.0;
@@ -1653,9 +1653,9 @@ public class ChrisRip extends AbstractClassifier implements
               numErrors[x] = coverage[x] - worthValue[x];
               pessimisticError[x] = ( (errorRate[x] + (zScore*zScore)/(2 * coverage[x]) + zScore * Math.sqrt( errorRate[x]/coverage[x] - (errorRate[x]*errorRate[x])/coverage[x] + (zScore*zScore)/(4*coverage[x]*coverage[x]) ) ) ) / (1 + (zScore*zScore)/coverage[x]);
           }
-          System.out.println("worthValue: " + worthValue[x]);
-          System.out.println("e = : " + errorRate[x]);
-          System.out.println("p = : " + pessimisticError[x]);
+          //System.out.println("worthValue: " + worthValue[x]);
+          //System.out.println("e = : " + errorRate[x]);
+          //System.out.println("p = : " + pessimisticError[x]);
         }
       }
 
@@ -1671,7 +1671,7 @@ public class ChrisRip extends AbstractClassifier implements
             + worthRt[i] + "=" + worthValue[i] + "/" + denom);
         }
         if (pessimisticError[i] < minP) { // Prefer to the
-        	System.out.println("minP: " + minP + " attempted p: " + pessimisticError[i]);
+        	//System.out.println("minP: " + minP + " attempted p: " + pessimisticError[i]);
         	minP = pessimisticError[i]; // shorter rule
           maxIndex = i;
           /*
